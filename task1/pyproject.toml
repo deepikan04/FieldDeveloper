@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "strict-mcp-server"
+version = "0.1.0"
+description = "A low-level MCP server with strict input validation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1,<2",
+    "pydantic>=2,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "asgi-lifespan",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["strict_mcp_server"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

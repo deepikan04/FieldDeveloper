@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Test all FieldDeveloper tasks",
+			"type": "shell",
+			"command": "zsh",
+			"args": [
+				"-lc",
+				"cd task1 && .venv/bin/python -m pytest -q && cd ../task2 && .venv/bin/python -m pytest -q && cd ../task3 && .venv/bin/python -m pytest -q && cd ../task4 && .venv/bin/python -m pytest -q"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

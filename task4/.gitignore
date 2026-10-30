@@ -1,0 +1,6 @@
+gateway.db
+*.db-wal
+*.db-shm
+.venv/
+__pycache__/
+.pytest_cache/
