@@ -15,6 +15,33 @@ from streaming_pii_gateway.provider import create_provider_app
 from streaming_pii_gateway.redactor import StreamRedactor, redact_text
 
 
+EMAIL_REGRESSIONS = [
+    "jane@verylongcompanyname.com",
+    "jane@example.technology",
+    "a" * 33 + "@example.com",
+    "first.last+tag@support.eu.verylongcompanyname.technology",
+    "a" * 64 + "@" + ".".join(["b" * 63] * 3 + ["c" * 61]),
+]
+
+
+@pytest.mark.parametrize("email", EMAIL_REGRESSIONS)
+@pytest.mark.parametrize("chunk_size", [1, 7, 64, 321, 4096])
+def test_long_emails_are_redacted_across_stream_boundaries(email, chunk_size):
+    # Long surrounding text forces emission while the email is arriving.
+    prefix = "Safe text. " * 40
+    suffix = ". Thank you! " * 40
+    text = prefix + email + suffix
+    expected = prefix + "[REDACTED]" + suffix
+    assert redact_text(text) == expected
+    redactor = StreamRedactor()
+    output = []
+    for offset in range(0, len(text), chunk_size):
+        output.append(redactor.feed(text[offset : offset + chunk_size]))
+        assert len(redactor.buffer) <= 2 * HOLDBACK
+    output.append(redactor.flush())
+    assert "".join(output) == expected
+
+
 @pytest.mark.parametrize(
     ("text", "expected"),
     [
@@ -97,6 +124,15 @@ async def test_gateway_redacts_in_process_provider_responses():
             custom_output = "".join(_parse_sse(custom.text))
             assert custom_output == "Edges: [REDACTED]; [REDACTED]; [REDACTED]. done"
             assert custom_output.count("[REDACTED]") == 3
+
+            for email in EMAIL_REGRESSIONS:
+                response = await client.post(
+                    "/v1/stream", json={"text": f"Contact {email}. Thanks!"}
+                )
+                assert response.status_code == 200
+                assert "".join(_parse_sse(response.text)) == (
+                    "Contact [REDACTED]. Thanks!"
+                )
 
 
 def _parse_sse(payload: str) -> list[str]:

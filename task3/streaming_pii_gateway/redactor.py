@@ -5,10 +5,13 @@ import re
 from config import HOLDBACK, REDACTED
 
 EMAIL_PATTERN = re.compile(
-    r"(?<![\w.+-])[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]{1,32}"
-    r"@[A-Za-z0-9](?:[A-Za-z0-9-]{0,8}[A-Za-z0-9])?"
-    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,8}[A-Za-z0-9])?)?"
-    r"\.[A-Za-z]{2,6}(?![A-Za-z0-9.-])"
+    r"(?<![\w.+-])[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@"
+    # Bound the entire domain, including all subdomains, to 253 characters.
+    # A sentence-ending period is punctuation; a dot followed by a domain
+    # character continues the address and must not allow a partial match.
+    r"(?=[A-Za-z0-9.-]{0,252}[A-Za-z0-9](?![A-Za-z0-9-]|\.[A-Za-z0-9]))"
+    r"(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+"
+    r"[A-Za-z]{2,63}(?![A-Za-z0-9-]|\.[A-Za-z0-9])"
 )
 SSN_PATTERN = re.compile(r"(?<!\d)\d{3}-\d{2}-\d{4}(?!\d)")
 CARD_PATTERN = re.compile(r"(?<!\d)(?:\d[ -]?){12,15}\d(?!\d)")

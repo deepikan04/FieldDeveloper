@@ -7,6 +7,8 @@ PROVIDER_STREAM_PATH = "/v1/stream"
 GATEWAY_STREAM_PATH = "/v1/stream"
 SSE_MEDIA_TYPE = "text/event-stream"
 REDACTED = "[REDACTED]"
-HOLDBACK = 64
+# Retain a complete email (64-character local part + @ + 253-character
+# domain) and boundary context until it can be safely emitted.
+HOLDBACK = 320
 PROVIDER_CHUNK_SIZE = 7
 PROVIDER_CHUNK_DELAY_SECONDS = 0.005
